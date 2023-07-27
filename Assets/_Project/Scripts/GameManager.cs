@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using _Project.Scripts.Enums;
 
 #endregion
 
@@ -12,6 +13,7 @@ namespace _Project.Scripts
 		#region Serialized Fields
 
 		public PlayerController Player;
+		
 
 		#endregion
 
@@ -20,12 +22,15 @@ namespace _Project.Scripts
 		private int coinScore;
 		private int totalCoinsInLevel;
 
+		public GameState GameState { get; private set; } = GameState.Playing;
+
 		#endregion
 
 		#region Public Events and Delegates
 
 		public event Action<int> CoinCollected;
 		public event Action<int> CoinSpawned;
+		public event Action GameEnded;
 
 		#endregion
 
@@ -44,6 +49,12 @@ namespace _Project.Scripts
 		}
 
 		#endregion
+
+		public void FinishLineCrossed()
+		{
+			GameState = GameState.Ended;
+			GameEnded?.Invoke();
+		}
 	}
 
 }

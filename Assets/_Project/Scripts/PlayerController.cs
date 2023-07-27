@@ -115,6 +115,11 @@ namespace _Project.Scripts
 
 		private void Update()
 		{
+			if (GameManager.Instance.GameState != GameState.Playing)
+			{
+				return;
+			}
+			
 			ProcessInput();
 			var final_velocity = ComputeFinalVelocity();
 
