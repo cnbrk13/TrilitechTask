@@ -1,17 +1,16 @@
 #region
 
 using System;
-using System.Collections.Generic;
 using _Project.Scripts.Enums;
 using _Project.Scripts.Structs;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 #endregion
 
 namespace _Project.Scripts
 {
+
 	public class PlayerController : MonoBehaviour
 	{
 		#region Serialized Fields
@@ -115,66 +114,13 @@ namespace _Project.Scripts
 		}
 
 		private void Update()
-         {
-             ProcessInput();
-             Vector2 final_velocity = ComputeFinalVelocity();
-         
-             rb.velocity = final_velocity;
-             CheckAndHandleMovementStatus(final_velocity);
-         }
-         
-         private void ProcessInput()
-         {
-             GatherInput();
-             if (inputs.BoostDown)
-             {
-                 currentBoostMultipAccel = boostMultipAccel;
-                 currentBoostMultipMaxVel = boostMultipMaxVel;
-             }
-             else
-             {
-                 currentBoostMultipAccel = 1f;
-                 currentBoostMultipMaxVel = 1f;
-             }
-         }
-         
-         private Vector2 ComputeFinalVelocity()
-         {
-             var velocity = rb.velocity;
-             velocity += CalculateGroundVelocity();
-             velocity += GetJumpVector();
-             velocity += CalculateGravity();
-         
-             ProcessJumpState(velocity);
-             return velocity;
-         }
-         
-         private void ProcessJumpState(Vector2 velocity)
-         {
-             if (JumpState != JumpState.Grounded)
-             {
-                 SetState(velocity.y > 0 ? JumpState.Jumping : JumpState.Falling);
-             }
-         }
-         
-         private void CheckAndHandleMovementStatus(Vector2 velocity)
-         {
-             bool currently_moving = velocity.x != 0;
-             
-             if (currently_moving)
-             {
-                 if(!isMoving && JumpState == JumpState.Grounded) 
-                 {
-                     StartedMove();
-                 }
-             }
-             else if (isMoving)
-             {
-                 StoppedMove();
-             }
-         
-             isMoving = currently_moving;
-         }
+		{
+			ProcessInput();
+			var final_velocity = ComputeFinalVelocity();
+
+			rb.velocity = final_velocity;
+			CheckAndHandleMovementStatus(final_velocity);
+		}
 
 		private void OnCollisionEnter2D(Collision2D other)
 		{
@@ -226,25 +172,6 @@ namespace _Project.Scripts
 			}
 
 			SetState(JumpState.Grounded);
-		}
-
-		// private void OnTriggerStay2D(Collider2D other)
-		// {
-		// 	if (!other.CompareTag("JumpSurface"))
-		// 	{
-		// 		return;
-		// 	}
-		//
-		// 	SetState(JumpState.Grounded);
-		// }
-
-		#endregion
-
-		#region Public Methods
-
-		private void PlayLandAnim()
-		{
-			DoPunchScaleTransform();
 		}
 
 		#endregion
@@ -305,6 +232,36 @@ namespace _Project.Scripts
 			//Vector3 zVel = transform.forward * (newZ - currentZ);
 
 			return x_vel;
+		}
+
+		private void CheckAndHandleMovementStatus(Vector2 velocity)
+		{
+			var currently_moving = velocity.x != 0;
+
+			if (currently_moving)
+			{
+				if (!isMoving && JumpState == JumpState.Grounded)
+				{
+					StartedMove();
+				}
+			}
+			else if (isMoving)
+			{
+				StoppedMove();
+			}
+
+			isMoving = currently_moving;
+		}
+
+		private Vector2 ComputeFinalVelocity()
+		{
+			var velocity = rb.velocity;
+			velocity += CalculateGroundVelocity();
+			velocity += GetJumpVector();
+			velocity += CalculateGravity();
+
+			ProcessJumpState(velocity);
+			return velocity;
 		}
 
 		private Vector2 DoJump()
@@ -398,6 +355,35 @@ namespace _Project.Scripts
 			DoPunchScale();
 		}
 
+		private void PlayLandAnim()
+		{
+			DoPunchScaleTransform();
+		}
+
+		private void ProcessInput()
+		{
+			GatherInput();
+
+			if (inputs.BoostDown)
+			{
+				currentBoostMultipAccel = boostMultipAccel;
+				currentBoostMultipMaxVel = boostMultipMaxVel;
+			}
+			else
+			{
+				currentBoostMultipAccel = 1f;
+				currentBoostMultipMaxVel = 1f;
+			}
+		}
+
+		private void ProcessJumpState(Vector2 velocity)
+		{
+			if (JumpState != JumpState.Grounded)
+			{
+				SetState(velocity.y > 0 ? JumpState.Jumping : JumpState.Falling);
+			}
+		}
+
 		private void SetState(JumpState new_state)
 		{
 			if (JumpState == new_state)
@@ -436,6 +422,15 @@ namespace _Project.Scripts
 
 		#endregion
 
+		// private void OnTriggerStay2D(Collider2D other)
+		// {
+		// 	if (!other.CompareTag("JumpSurface"))
+		// 	{
+		// 		return;
+		// 	}
+		//
+		// 	SetState(JumpState.Grounded);
+		// }
 	}
 
 }

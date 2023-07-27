@@ -1,105 +1,135 @@
-﻿using UnityEngine;
-using UnityEngine.Serialization;
+﻿#region
+
+using UnityEngine;
+
+#endregion
 
 namespace _Project.Scripts
 {
 
-    public abstract class Singleton<T> : Singleton where T : MonoBehaviour
-    {
-        private static T instance;
+	public abstract class Singleton<T> : Singleton where T : MonoBehaviour
+	{
+		#region Serialized Fields
 
-        private static readonly object Lock = new object();
+		[SerializeField] private bool isPersistent;
 
-        [SerializeField] private bool isPersistent = false;
+		#endregion
 
-        public static bool IsNull
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    return true;
-                }
+		#region Constants and Fields
 
-                return false;
-            }
-        }
+		private static readonly object Lock = new();
+		private static T instance;
 
-        public static T Instance
-        {
-            get
-            {
-                if (Exiting)
-                {
-                    Debug.Log($"{nameof(Singleton)}<{typeof(T)}>: Cikis yapiliyor. Instance dondurulmeyecek.");
-                    return null;
-                }
+		#endregion
 
-                lock (Lock)
-                {
-                    if (instance != null)
-                    {
-                        return instance;
-                    }
+		#region Public Properties
 
-                    var instances = FindObjectsOfType<T>(true);
-                    var instance_count = instances.Length;
-                    
-                    if (instance_count > 0)
-                    {
-                        if (instance_count == 1)
-                        {
-                            return instance = instances[0];
-                        }
+		public static T Instance
+		{
+			get
+			{
+				if (Exiting)
+				{
+					Debug.Log($"{nameof(Singleton)}<{typeof(T)}>: Cikis yapiliyor. Instance dondurulmeyecek.");
+					return null;
+				}
 
-                        for (var i = 1; i < instances.Length; i++)
-                        {
-                            Destroy(instances[i]);
-                        }
+				lock (Lock)
+				{
+					if (instance != null)
+					{
+						return instance;
+					}
 
-                        return instance = instances[0];
-                    }
+					var instances = FindObjectsOfType<T>(true);
+					var instance_count = instances.Length;
 
-                    return instance = new GameObject($"{typeof(T)} (Otomatik Olusturuldu)").AddComponent<T>();
-                }
-            }
-        }
+					if (instance_count > 0)
+					{
+						if (instance_count == 1)
+						{
+							return instance = instances[0];
+						}
 
-        private void Awake()
-        {
-            if (isPersistent)
-            {
-                var instances = FindObjectsOfType<T>(false);
-                
-                if (instances.Length > 1)
-                {
-                    for (var i = 1; i < instances.Length; i++)
-                    {
-                        Destroy(instances[i].gameObject);
-                    }
-                }
-                else
-                {
-                    DontDestroyOnLoad(gameObject);
-                }
-            }
+						for (var i = 1; i < instances.Length; i++)
+						{
+							Destroy(instances[i]);
+						}
 
-            OnAwake();
-        }
+						return instance = instances[0];
+					}
 
-        protected virtual void OnAwake()
-        {
-        }
-    }
+					return instance = new GameObject($"{typeof(T)} (Otomatik Olusturuldu)").AddComponent<T>();
+				}
+			}
+		}
 
-    public abstract class Singleton : MonoBehaviour
-    {
-        protected static bool Exiting { get; private set; }
+		public static bool IsNull
+		{
+			get
+			{
+				if (instance == null)
+				{
+					return true;
+				}
 
-        private void OnApplicationQuit()
-        {
-            Exiting = true;
-        }
-    }
+				return false;
+			}
+		}
+
+		#endregion
+
+		#region Unity Methods
+
+		private void Awake()
+		{
+			if (isPersistent)
+			{
+				var instances = FindObjectsOfType<T>(false);
+
+				if (instances.Length > 1)
+				{
+					for (var i = 1; i < instances.Length; i++)
+					{
+						Destroy(instances[i].gameObject);
+					}
+				}
+				else
+				{
+					DontDestroyOnLoad(gameObject);
+				}
+			}
+
+			OnAwake();
+		}
+
+		#endregion
+
+		#region Protected Methods
+
+		protected virtual void OnAwake()
+		{
+		}
+
+		#endregion
+	}
+
+	public abstract class Singleton : MonoBehaviour
+	{
+		#region Protected Properties
+
+		protected static bool Exiting { get; private set; }
+
+		#endregion
+
+		#region Unity Methods
+
+		private void OnApplicationQuit()
+		{
+			Exiting = true;
+		}
+
+		#endregion
+	}
 
 }
